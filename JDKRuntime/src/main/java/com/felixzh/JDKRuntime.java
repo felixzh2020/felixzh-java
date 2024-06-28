@@ -1,4 +1,4 @@
-package com.felixzh.learning;
+package com.felixzh;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

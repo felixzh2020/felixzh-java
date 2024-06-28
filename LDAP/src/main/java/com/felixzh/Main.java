@@ -1,4 +1,4 @@
-package com.felixzh.learning;
+package com.felixzh;
 
 import java.util.Hashtable;
 import javax.naming.Context;
