@@ -85,5 +85,6 @@
         <module>NativeMemoryTrack</module>
         <module>JDKRuntime</module>
         <module>LDAP</module>
+        <module>SparkCase</module>
     </modules>
 </project>
