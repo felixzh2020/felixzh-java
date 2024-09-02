@@ -11,15 +11,19 @@ import org.apache.spark.streaming.api.java.JavaInputDStream;
 import org.apache.spark.streaming.api.java.JavaStreamingContext;
 import org.apache.spark.streaming.kafka010.*;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author FelixZh
  * @desc 测试数据无要求
+ * 如果不同Topic处理逻辑不同,比如过滤/去重/ETL等等,可以为不同Topic单独创建DirectStream
  */
-public class Kafka2Kafka {
+public class KafkaUnion {
     public static void main(String[] args) throws Exception {
-        SparkConf sparkConf = new SparkConf().setAppName("kafka2kafka");
+        SparkConf sparkConf = new SparkConf().setAppName("kafkaUnion");
         JavaStreamingContext javaStreamingContext = new JavaStreamingContext(sparkConf, Durations.seconds(10));
 
         Map<String, Object> kafkaParams = new HashMap<>();
@@ -30,28 +34,27 @@ public class Kafka2Kafka {
         kafkaParams.put("auto.offset.reset", "latest");
         kafkaParams.put("enable.auto.commit", false);
 
-        Collection<String> topics = Collections.singletonList("in");
-        JavaInputDStream<ConsumerRecord<String, String>> dStream = KafkaUtils.createDirectStream
-                (javaStreamingContext, LocationStrategies.PreferConsistent(), ConsumerStrategies.Subscribe(topics, kafkaParams));
-        dStream.foreachRDD(rdd -> {
+        Collection<String> topics1 = Collections.singletonList("topic1");
+        Collection<String> topics2 = Collections.singletonList("topic2");
+        JavaInputDStream<ConsumerRecord<String, String>> dStream1 = KafkaUtils.createDirectStream
+                (javaStreamingContext, LocationStrategies.PreferConsistent(), ConsumerStrategies.Subscribe(topics1, kafkaParams));
+        JavaInputDStream<ConsumerRecord<String, String>> dStream2 = KafkaUtils.createDirectStream
+                (javaStreamingContext, LocationStrategies.PreferConsistent(), ConsumerStrategies.Subscribe(topics2, kafkaParams));
+
+        // 这里进行dStream1和dStream2 不同的处理逻辑
+        // ........
+
+        // 两个相同interval的数据流，进行union合并
+        dStream1.union(dStream2).foreachRDD(rdd -> {
             if (rdd.isEmpty()) {
                 return;
             }
 
-            // 获取当前offset
-            OffsetRange[] offsetRanges = ((HasOffsetRanges) rdd.rdd()).offsetRanges();
-
-            // 数据处理
-            Producer<String, String> producer = new KafkaProducer<>(kafkaParams);
             rdd.foreachPartition(consumerRecords -> {
                 while (consumerRecords.hasNext()) {
-                    producer.send(new ProducerRecord<>("out", consumerRecords.next().value()));
+                    System.out.println(consumerRecords.next().value());
                 }
             });
-            producer.close();
-
-            // 提交offset
-            ((CanCommitOffsets) dStream.inputDStream()).commitAsync(offsetRanges);
         });
 
         javaStreamingContext.start();

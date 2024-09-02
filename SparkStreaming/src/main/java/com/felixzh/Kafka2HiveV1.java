@@ -19,12 +19,19 @@ import java.util.*;
 /**
  * @author FelixZh
  * @desc 测试数据schema id,name,part
+ * beeline 创建 Hive表
+ * create table test(value string) partitioned by (part string) stored as orc;
  */
-public class Kafka2Hdfs {
+public class Kafka2HiveV1 {
     public static void main(String[] args) throws Exception {
-        SparkConf sparkConf = new SparkConf().setAppName("kafka2Hdfs");
-        SparkSession sparkSession = SparkSession.builder().config(sparkConf).getOrCreate();
-        JavaStreamingContext javaStreamingContext = new JavaStreamingContext(sparkConf, Durations.seconds(10));
+        SparkConf sparkConf = new SparkConf().setAppName("kafka2HiveV1");
+        SparkSession sparkSession = SparkSession.builder().config(sparkConf)
+                .enableHiveSupport() // Enables Hive support, including connectivity to a persistent Hive metastore,
+                // support for Hive serdes, and Hive user-defined functions.
+                .getOrCreate();
+        sparkSession.sqlContext().setConf("hive.exec.dynamic.partition.mode", "nonstrict");
+
+        JavaStreamingContext javaStreamingContext = new JavaStreamingContext(sparkConf, Durations.seconds(60));
 
         Map<String, Object> kafkaParams = new HashMap<>();
         kafkaParams.put("bootstrap.servers", "felixzh:9092");
@@ -57,17 +64,12 @@ public class Kafka2Hdfs {
             fields.add(DataTypes.createStructField("part", DataTypes.StringType, true));
             StructType schema = DataTypes.createStructType(fields);
 
-            // Spark UI Output Op Duration 与 Job Duration 之和 相差巨大  测试
-            // 原因：Output Op Duration = Driver端耗时 +  Job Duration 之和
-            // Driver端耗时：往Driver端拉取数据的算子、shuffle数据量大(blockManager数据量大)、其他耗时(如sparkSession.sql)等等
-            Thread.sleep(30_000);
-
             // 将schema与数据转为DataFrame
             Dataset<Row> df = sparkSession.createDataFrame(rowRDD, schema);
 
-            // 将数据写入到HDFS
+            // 将数据写入到Hive
             // coalesce：非shuffle 大->小   repartition：shuffle 大->小 或者 小->大
-            df.repartition(1).write().partitionBy("part").mode(SaveMode.Append).parquet("/tmp/parquet");
+            df.repartition(1).write().partitionBy("part").format("hive").mode(SaveMode.Append).saveAsTable("test");
 
             // 提交offset
             ((CanCommitOffsets) dStream.inputDStream()).commitAsync(offsetRanges);
