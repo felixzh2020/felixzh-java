@@ -1,0 +1,9 @@
+spark-submit \
+  --class com.felixzh.Kafka2Hdfs \
+  --master yarn \
+  --deploy-mode client \
+  --conf spark.default.parallelism=1 \
+  --num-executors 1 \
+  --executor-cores 1 \
+  --executor-memory 1G \
+/opt/SparkStreaming-1.0-jar-with-dependencies.jar
