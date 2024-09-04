@@ -52,7 +52,7 @@ public class Kafka2Hdfs {
 
             // 定义schema
             List<StructField> fields = new ArrayList<>();
-            fields.add(DataTypes.createStructField("id", DataTypes.IntegerType, true));
+            fields.add(DataTypes.createStructField("id", DataTypes.StringType, true));
             fields.add(DataTypes.createStructField("name", DataTypes.StringType, true));
             fields.add(DataTypes.createStructField("part", DataTypes.StringType, true));
             StructType schema = DataTypes.createStructType(fields);
