@@ -25,13 +25,14 @@ import java.util.*;
 public class Kafka2HiveV1 {
     public static void main(String[] args) throws Exception {
         SparkConf sparkConf = new SparkConf().setAppName("kafka2HiveV1");
+
+        JavaStreamingContext javaStreamingContext = new JavaStreamingContext(sparkConf, Durations.seconds(60));
+
         SparkSession sparkSession = SparkSession.builder().config(sparkConf)
                 .enableHiveSupport() // Enables Hive support, including connectivity to a persistent Hive metastore,
                 // support for Hive serdes, and Hive user-defined functions.
                 .getOrCreate();
         sparkSession.sqlContext().setConf("hive.exec.dynamic.partition.mode", "nonstrict");
-
-        JavaStreamingContext javaStreamingContext = new JavaStreamingContext(sparkConf, Durations.seconds(60));
 
         Map<String, Object> kafkaParams = new HashMap<>();
         kafkaParams.put("bootstrap.servers", "felixzh:9092");

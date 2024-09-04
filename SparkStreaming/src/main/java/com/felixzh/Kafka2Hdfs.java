@@ -23,8 +23,8 @@ import java.util.*;
 public class Kafka2Hdfs {
     public static void main(String[] args) throws Exception {
         SparkConf sparkConf = new SparkConf().setAppName("kafka2Hdfs");
-        SparkSession sparkSession = SparkSession.builder().config(sparkConf).getOrCreate();
         JavaStreamingContext javaStreamingContext = new JavaStreamingContext(sparkConf, Durations.seconds(10));
+        SparkSession sparkSession = SparkSession.builder().config(sparkConf).getOrCreate();
 
         Map<String, Object> kafkaParams = new HashMap<>();
         kafkaParams.put("bootstrap.servers", "felixzh:9092");
