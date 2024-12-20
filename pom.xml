@@ -88,5 +88,6 @@
         <module>SparkCase</module>
         <module>SparkStreaming</module>
         <module>SparkStructuredStreaming</module>
+        <module>JavaJNI</module>
     </modules>
 </project>
