@@ -89,5 +89,6 @@
         <module>SparkStreaming</module>
         <module>SparkStructuredStreaming</module>
         <module>JavaJNI</module>
+        <module>Janino</module>
     </modules>
 </project>
