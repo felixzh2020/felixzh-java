@@ -90,5 +90,6 @@
         <module>SparkStructuredStreaming</module>
         <module>JavaJNI</module>
         <module>Janino</module>
+        <module>JavaCostTime</module>
     </modules>
 </project>
