@@ -98,5 +98,6 @@
         <module>JavaJNI</module>
         <module>Janino</module>
         <module>JavaCostTime</module>
+        <module>CompletableFuture</module>
     </modules>
 </project>
