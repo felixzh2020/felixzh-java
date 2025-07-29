@@ -99,5 +99,8 @@
         <module>Janino</module>
         <module>JavaCostTime</module>
         <module>CompletableFuture</module>
+        <module>SynchronizedWaitNotify</module>
+        <module>LockCondition</module>
+        <module>MyClassLoader</module>
     </modules>
 </project>
